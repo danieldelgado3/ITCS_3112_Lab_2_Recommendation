@@ -1,6 +1,44 @@
+using ITCS_3112_Lab_2_Recommendation.Contracts;
+using ITCS_3112_Lab_2_Recommendation.Domain;
+using ITCS_3112_Lab_2_Recommendation.Enum;
+
 namespace ITCS_3112_Lab_2_Recommendation.Services;
 
 public class RatingService
 {
-    
+    private IRatingRepository ratingRepo;
+    private IBookRepository bookRepo;
+    private IMemberRepository memberRepo;
+
+    public RatingService(IRatingRepository rRepo, IBookRepository bRepo, IMemberRepository mRepo)
+    {
+        ratingRepo = rRepo;
+        bookRepo = bRepo;
+        memberRepo = mRepo;
+    }
+
+    public void RateBook(string memberId, string isbn, RatingValue value)
+    {
+        if (string.IsNullOrWhiteSpace(memberId))
+            throw new ArgumentException("Invalid memberId");
+
+        if (string.IsNullOrWhiteSpace(isbn))
+            throw new ArgumentException("Invalid ISBN");
+
+        // TODO: Once member repo is implemented         
+        //Member member = memberRepo.GetMember(int.Parse(memberId));
+        Book book = bookRepo.GetBook(isbn);
+        
+        //Dummy member. TODO: Remove once member repo is implemented
+        Member member = new Member(isbn, int.Parse(memberId));
+
+        Rating rating = new Rating(member, book, value);
+
+        ratingRepo.AddRating(rating);
+    }
+
+    public IReadOnlyList<Rating> GetUserRatings(string memberId)
+    {
+        return ratingRepo.GetRatingsForMember(memberId);
+    }
 }
