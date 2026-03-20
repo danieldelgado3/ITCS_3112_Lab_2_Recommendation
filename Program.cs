@@ -1,4 +1,4 @@
-﻿using ITCS_3112_Lab_2_Recommendation.Contracts;
+using ITCS_3112_Lab_2_Recommendation.Contracts;
 using ITCS_3112_Lab_2_Recommendation.Domain;
 using ITCS_3112_Lab_2_Recommendation.Enum;
 using ITCS_3112_Lab_2_Recommendation.Repositories;
@@ -18,26 +18,36 @@ class Program
         // services
         IBookService bookService = new BookService(bookRepo);
         IRatingService ratingService = new RatingService(ratingRepo, bookRepo, memberRepo);
+        IAuthenticationService authService = new AuthenticationService(memberRepo);
 
-        // fileloaders
-        BookFileLoader loader = new BookFileLoader(bookRepo);
+        // file loaders
+        BookFileLoader bookLoader = new BookFileLoader(bookRepo);
+        RatingFileLoader ratingLoader = new RatingFileLoader(ratingRepo, memberRepo, bookRepo);
 
         Console.WriteLine("Welcome to the Book Recommendation System!");
-        RunMenu(bookService, ratingService, loader);
+        RunMenu(bookService, ratingService, authService, bookLoader, ratingLoader);
     }
 
-    public static void RunMenu(IBookService bookService, IRatingService ratingService, BookFileLoader loader) // TODO: maybe add the rating file loader to constructor?
+    public static void RunMenu(IBookService bookService, IRatingService ratingService, IAuthenticationService authService, BookFileLoader bookLoader, RatingFileLoader ratingLoader)
     {
         bool running = true;
 
         while (running)
         {
+            if (authService.IsLoggedIn())
+                Console.WriteLine($"Logged in as: {authService.GetCurrentUser()!.Name} (ID: {authService.GetCurrentUser()!.AccountId})");
+            else
+                Console.WriteLine("Not logged in.");
+
             Console.WriteLine("Choose an option:");
             Console.WriteLine("1) Load books from file");
-            Console.WriteLine("2) Add a new book");
-            Console.WriteLine("3) Rate a book");
-            Console.WriteLine("4) View my ratings");
-            Console.WriteLine("5) List all books");
+            Console.WriteLine("2) Load ratings from file");
+            Console.WriteLine("3) Add a new book");
+            Console.WriteLine("4) Rate a book");
+            Console.WriteLine("5) View my ratings");
+            Console.WriteLine("6) List all books");
+            Console.WriteLine("7) Login");
+            Console.WriteLine("8) Logout");
             Console.WriteLine("0) Exit");
 
             string? choice = Console.ReadLine();
@@ -47,15 +57,15 @@ class Program
             {
                 case "1":
                     Console.Write("Enter book file path: ");
-                    string fileName = Console.ReadLine()!;
+                    string bookPath = Console.ReadLine()!;
                     try
                     {
-                        loader.Load(fileName); 
+                        bookLoader.Load(bookPath);
                         Console.WriteLine("Books loaded successfully!");
                     }
                     catch (FileNotFoundException)
                     {
-                        Console.WriteLine($"File '{fileName}' not found.");
+                        Console.WriteLine($"File '{bookPath}' not found.");
                     }
                     catch (Exception e)
                     {
@@ -64,6 +74,24 @@ class Program
                     break;
 
                 case "2":
+                    Console.Write("Enter ratings file path: ");
+                    string ratingsPath = Console.ReadLine()!;
+                    try
+                    {
+                        ratingLoader.Load(ratingsPath);
+                        Console.WriteLine("Ratings loaded successfully!");
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        Console.WriteLine($"File '{ratingsPath}' not found.");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Error loading ratings: {e.Message}");
+                    }
+                    break;
+
+                case "3":
                     Console.Write("Title: ");
                     string title = Console.ReadLine()!;
                     Console.Write("Author: ");
@@ -82,9 +110,12 @@ class Program
                     }
                     break;
 
-                case "3":
-                    Console.Write("Your Member ID: ");
-                    string memberId = Console.ReadLine()!;
+                case "4":
+                    if (!authService.IsLoggedIn())
+                    {
+                        Console.WriteLine("Please log in first.");
+                        break;
+                    }
 
                     Console.Write("Book ID: ");
                     string bookId = Console.ReadLine()!;
@@ -105,6 +136,7 @@ class Program
 
                     try
                     {
+                        string memberId = authService.GetCurrentUser()!.AccountId.ToString();
                         ratingService.RateBook(memberId, bookId, ratingValue);
                         Console.WriteLine("Rating saved!");
                     }
@@ -119,9 +151,14 @@ class Program
 
                     break;
 
-                case "4":
-                    Console.Write("Your Member ID: ");
-                    string userId = Console.ReadLine()!;
+                case "5":
+                    if (!authService.IsLoggedIn())
+                    {
+                        Console.WriteLine("Please log in first.");
+                        break;
+                    }
+
+                    string userId = authService.GetCurrentUser()!.AccountId.ToString();
                     var ratings = ratingService.GetUserRatings(userId);
 
                     if (ratings.Count == 0)
@@ -131,13 +168,44 @@ class Program
                             Console.WriteLine($"{r.Book.Title} -> {r.Value}");
                     break;
 
-                case "5":
+                case "6":
                     var booksList = bookService.GetAllBooks();
                     if (booksList.Count == 0)
                         Console.WriteLine("No books available.");
                     else
                         foreach (var b in booksList)
                             Console.WriteLine($"{b.ISBN} | {b.Title} by {b.Author} ({b.Year})");
+                    break;
+
+                case "7":
+                    Console.Write("Enter your account ID: ");
+                    string loginId = Console.ReadLine() ?? "";
+                    try
+                    {
+                        authService.Login(loginId);
+                        Console.WriteLine($"Welcome, {authService.GetCurrentUser()!.Name}!");
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        Console.WriteLine($"Login failed: {ex.Message}");
+                    }
+                    catch (KeyNotFoundException ex)
+                    {
+                        Console.WriteLine($"Login failed: {ex.Message}");
+                    }
+                    break;
+
+                case "8":
+                    if (authService.IsLoggedIn())
+                    {
+                        string name = authService.GetCurrentUser()!.Name;
+                        authService.Logout();
+                        Console.WriteLine($"Goodbye, {name}!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("You are not logged in.");
+                    }
                     break;
 
                 case "0":

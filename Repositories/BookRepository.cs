@@ -23,12 +23,20 @@ public class BookRepository : IBookRepository
         if (string.IsNullOrWhiteSpace(isbn))
             throw new ArgumentException("ISBN cannot be empty", nameof(isbn));
 
-        Book book = _books.FirstOrDefault(b => b.ISBN == isbn);
+        if (TryGetBook(isbn, out Book? book) && book != null)
+            return book;
 
-        if (book is null)
-            throw new KeyNotFoundException($"Book with ISBN {isbn} not found");
+        throw new KeyNotFoundException($"Book with ISBN {isbn} not found");
+    }
 
-        return book;
+    public bool TryGetBook(string isbn, out Book? book)
+    {
+        book = null;
+        if (string.IsNullOrWhiteSpace(isbn))
+            return false;
+
+        book = _books.FirstOrDefault(b => b.ISBN == isbn);
+        return book != null;
     }
 
     public List<Book> GetAllBooks()

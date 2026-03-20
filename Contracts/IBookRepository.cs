@@ -6,5 +6,6 @@ public interface IBookRepository
 {
     void AddBook(Book book);
     Book GetBook(string isbn);
+    bool TryGetBook(string isbn, out Book? book);
     List<Book> GetAllBooks();
 }
