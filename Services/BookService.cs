@@ -3,7 +3,7 @@ using ITCS_3112_Lab_2_Recommendation.Domain;
 
 namespace ITCS_3112_Lab_2_Recommendation.Services;
 
-public class BookService
+public class BookService : IBookService
 {
     private IBookRepository _bookRepo;
 
@@ -12,9 +12,18 @@ public class BookService
         _bookRepo = repo;
     }
 
-    public void AddBook(Book book)
+    public Boolean AddBook(Book book)
     {
-        _bookRepo.AddBook(book);
+        try
+        {
+            _bookRepo.AddBook(book);
+            return true;
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.WriteLine(e.Message);
+            return false;
+        }
     }
 
     public Book GetBook(string isbn)

@@ -7,6 +7,11 @@ public class BookFileLoader : IFileLoader
 {
     
     private readonly IBookRepository _bookRepo;
+
+    public BookFileLoader(IBookRepository bookRepo)
+    {
+        _bookRepo = bookRepo;
+    }
     
     public void Load(string path)
     {
@@ -21,9 +26,9 @@ public class BookFileLoader : IFileLoader
             string [] sections = line.Split(',');
             string author = sections[0];
             string title = sections[1];
-            int year = int.Parse(sections[2]);
+            string year = sections[2];
             string isbn = (i + 1).ToString();
-            Book book = new Book(author, title, isbn, year);
+            Book book = new Book(isbn, author, title, year);
             _bookRepo.AddBook(book);
         }
     }

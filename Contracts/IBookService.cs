@@ -4,7 +4,7 @@ namespace ITCS_3112_Lab_2_Recommendation.Contracts;
 
 public interface IBookService
 {
-    void AddBook(Book book);
+    Boolean AddBook(Book book);
     Book GetBook(string isbn);
     List<Book> GetAllBooks();
 }

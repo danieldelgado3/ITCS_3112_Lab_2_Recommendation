@@ -5,9 +5,9 @@ public class Book
     public string ISBN { get; }
     public string Author { get; }
     public string Title { get; }
-    public int Year { get; }
+    public string Year { get; }
 
-    public Book(string isbn, string author, string title, int year)
+    public Book(string isbn, string author, string title, string year)
     {
         ISBN = isbn;
         Author = author;
