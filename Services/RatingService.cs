@@ -4,7 +4,7 @@ using ITCS_3112_Lab_2_Recommendation.Enum;
 
 namespace ITCS_3112_Lab_2_Recommendation.Services;
 
-public class RatingService
+public class RatingService : IRatingService
 {
     private IRatingRepository ratingRepo;
     private IBookRepository bookRepo;
