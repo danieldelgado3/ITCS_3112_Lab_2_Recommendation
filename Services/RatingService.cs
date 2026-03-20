@@ -30,7 +30,7 @@ public class RatingService : IRatingService
         Book book = bookRepo.GetBook(isbn);
         
         //Dummy member. TODO: Remove once member repo is implemented
-        Member member = new Member(isbn, int.Parse(memberId));
+        Member member = new Member("TempUser", int.Parse(memberId));
 
         Rating rating = new Rating(member, book, value);
 
