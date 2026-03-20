@@ -5,34 +5,34 @@ namespace ITCS_3112_Lab_2_Recommendation.Repositories;
 public class RatingRepository
 {
     
-    private List<Rating> ratings = new List<Rating>();
+    private List<Rating> _ratings = new List<Rating>();
 
     public void AddRating(Rating rating)
     {
         if (rating == null)
             throw new ArgumentNullException(nameof(rating));
         
-        for (int i = 0; i < ratings.Count; i++)
+        for (int i = 0; i < _ratings.Count; i++)
         {
-            if (ratings[i].Member.AccountId == rating.Member.AccountId &&
-                ratings[i].Book.ISBN == rating.Book.ISBN)
+            if (_ratings[i].Member.AccountId == rating.Member.AccountId &&
+                _ratings[i].Book.ISBN == rating.Book.ISBN)
             {
-                ratings.RemoveAt(i);
+                _ratings.RemoveAt(i);
                 break;
             }
         }
 
-        ratings.Add(rating);
+        _ratings.Add(rating);
     }
 
     public Rating GetRating(string memberId, string isbn)
     {
-        for (int i = 0; i < ratings.Count; i++)
+        for (int i = 0; i < _ratings.Count; i++)
         {
-            if (ratings[i].Member.AccountId.ToString() == memberId &&
-                ratings[i].Book.ISBN == isbn)
+            if (_ratings[i].Member.AccountId.ToString() == memberId &&
+                _ratings[i].Book.ISBN == isbn)
             {
-                return ratings[i];
+                return _ratings[i];
             }
         }
 
@@ -46,11 +46,11 @@ public class RatingRepository
 
         List<Rating> memberRatings = new List<Rating>();
 
-        for (int i = 0; i < ratings.Count; i++)
+        for (int i = 0; i < _ratings.Count; i++)
         {
-            if (ratings[i].Member.AccountId.ToString() == memberId)
+            if (_ratings[i].Member.AccountId.ToString() == memberId)
             {
-                memberRatings.Add(ratings[i]);
+                memberRatings.Add(_ratings[i]);
             }
         }
 
@@ -59,6 +59,6 @@ public class RatingRepository
 
     public IReadOnlyList<Rating> GetAll()
     {
-        return ratings;
+        return _ratings;
     }
 }
