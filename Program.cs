@@ -19,16 +19,17 @@ class Program
         IBookService bookService = new BookService(bookRepo);
         IRatingService ratingService = new RatingService(ratingRepo, bookRepo, memberRepo);
         IAuthenticationService authService = new AuthenticationService(memberRepo);
+        IRecommendationService recommendationService = new RecommendationService(ratingRepo, bookRepo, memberRepo);
 
         // file loaders
         BookFileLoader bookLoader = new BookFileLoader(bookRepo);
         RatingFileLoader ratingLoader = new RatingFileLoader(ratingRepo, memberRepo, bookRepo);
 
         Console.WriteLine("Welcome to the Book Recommendation System!");
-        RunMenu(bookService, ratingService, authService, bookLoader, ratingLoader);
+        RunMenu(bookService, ratingService, authService, bookLoader, ratingLoader,  recommendationService);
     }
 
-    public static void RunMenu(IBookService bookService, IRatingService ratingService, IAuthenticationService authService, BookFileLoader bookLoader, RatingFileLoader ratingLoader)
+    public static void RunMenu(IBookService bookService, IRatingService ratingService, IAuthenticationService authService, BookFileLoader bookLoader, RatingFileLoader ratingLoader, IRecommendationService recommendationService)
     {
         bool running = true;
 
@@ -48,6 +49,7 @@ class Program
             Console.WriteLine("6) List all books");
             Console.WriteLine("7) Login");
             Console.WriteLine("8) Logout");
+            Console.WriteLine("9) View book recommendations");
             Console.WriteLine("0) Exit");
 
             string? choice = Console.ReadLine();
@@ -205,6 +207,26 @@ class Program
                     else
                     {
                         Console.WriteLine("You are not logged in.");
+                    }
+                    break;
+                
+                case "9":
+                    if (!authService.IsLoggedIn())
+                    {
+                        Console.WriteLine("Please log in first.");
+                        break;
+                    }
+
+                    var currentUser = authService.GetCurrentUser()!;
+                    var recommendedBooks = recommendationService.GetRecommendations(currentUser, 5);
+
+                    if (recommendedBooks.Count == 0)
+                        Console.WriteLine("No recommendations available. Rate more books to get better suggestions!");
+                    else
+                    {
+                        Console.WriteLine("Recommended books for you:");
+                        foreach (var b in recommendedBooks)
+                            Console.WriteLine($"{b.ISBN} | {b.Title} by {b.Author} ({b.Year})");
                     }
                     break;
 

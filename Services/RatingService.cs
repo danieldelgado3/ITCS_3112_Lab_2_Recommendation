@@ -24,13 +24,10 @@ public class RatingService : IRatingService
 
         if (string.IsNullOrWhiteSpace(isbn))
             throw new ArgumentException("Invalid ISBN");
-
-        // TODO: Once member repo is implemented         
-        //Member member = memberRepo.GetMember(int.Parse(memberId));
-        Book book = bookRepo.GetBook(isbn);
         
-        //Dummy member. TODO: Remove once member repo is implemented
-        Member member = new Member("TempUser", int.Parse(memberId));
+        Member member = memberRepo.GetMember(int.Parse(memberId));
+        Book book = bookRepo.GetBook(isbn);
+        ;
 
         Rating rating = new Rating(member, book, value);
 
